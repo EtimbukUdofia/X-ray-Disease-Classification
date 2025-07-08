@@ -1,0 +1,343 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>X-ray Disease Classifier</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        min-height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #e0e7ff 0%, #f8fafc 100%);
+        font-family: "Inter", Arial, sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .container {
+        background: #fff;
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        border-radius: 18px;
+        padding: 2.5rem 2rem 2rem 2rem;
+        max-width: 700px;
+        width: 90vw;
+        min-width: 0;
+        margin: 2rem auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      h1 {
+        font-weight: 600;
+        font-size: 2rem;
+        color: #1e293b;
+        margin-bottom: 1.5rem;
+      }
+      form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      input[type="file"] {
+        display: none;
+      }
+      .custom-file-upload {
+        border: 2px dashed #6366f1;
+        color: #6366f1;
+        background: #f1f5f9;
+        padding: 1rem 2rem;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        margin-bottom: 1.2rem;
+        transition: background 0.2s, color 0.2s, border 0.2s;
+      }
+      .custom-file-upload:hover {
+        background: #6366f1;
+        color: #fff;
+        border: 2px solid #6366f1;
+      }
+      .submit-btn {
+        background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.8rem 2rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.08);
+        transition: background 0.2s, transform 0.2s;
+      }
+      .submit-btn:hover {
+        background: linear-gradient(90deg, #60a5fa 0%, #6366f1 100%);
+        transform: translateY(-2px) scale(1.03);
+      }
+      .result-card {
+        background: #f1f5f9;
+        border-radius: 14px;
+        box-shadow: 0 4px 16px 0 rgba(99, 102, 241, 0.08);
+        padding: 1.5rem 1rem;
+        margin-top: 2rem;
+        width: 100%;
+        text-align: center;
+        animation: fadeIn 0.7s;
+      }
+      .result-card h2 {
+        color: #6366f1;
+        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
+      }
+      .result-card h3 {
+        color: #059669;
+        font-size: 1.1rem;
+        margin-bottom: 1.2rem;
+      }
+      .image-preview {
+        margin-top: 1rem;
+      }
+      .image-preview img {
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
+        max-width: 100%;
+        height: auto;
+      }
+      @media (max-width: 900px) {
+        .container {
+          max-width: 98vw;
+          width: 98vw;
+          padding: 1.5rem 0.5rem;
+        }
+      }
+      @media (max-width: 600px) {
+        .container {
+          max-width: 100vw;
+          width: 100vw;
+          padding: 1rem 0.2rem;
+          border-radius: 0;
+        }
+        h1 {
+          font-size: 1.1rem;
+        }
+        .bar-label {
+          flex: 0 0 80px;
+          font-size: 0.85rem;
+        }
+        .bar-value {
+          font-size: 0.85rem;
+          min-width: 36px;
+        }
+        .bar-bg {
+          height: 16px;
+        }
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .confidence-bars {
+        margin: 1.5rem 0 0.5rem 0;
+        width: 100%;
+        text-align: left;
+      }
+      .bar-row {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.6rem;
+      }
+      .bar-label {
+        flex: 0 0 120px;
+        font-size: 0.98rem;
+        color: #334155;
+        font-weight: 500;
+        margin-right: 0.5rem;
+        text-align: right;
+      }
+      .bar-bg {
+        flex: 1;
+        background: #e0e7ff;
+        border-radius: 8px;
+        height: 22px;
+        position: relative;
+        margin-right: 0.5rem;
+        overflow: hidden;
+      }
+      .bar-fill {
+        height: 100%;
+        border-radius: 8px;
+        background: linear-gradient(90deg, #6366f1 0%, #60a5fa 100%);
+        transition: width 0.7s cubic-bezier(0.4, 2, 0.6, 1);
+      }
+      .bar-fill.predicted {
+        background: linear-gradient(90deg, #059669 0%, #34d399 100%);
+        box-shadow: 0 0 8px #05966944;
+      }
+      .bar-value {
+        font-size: 0.95rem;
+        color: #6366f1;
+        font-weight: 600;
+        min-width: 48px;
+        text-align: left;
+      }
+      .bar-value.predicted {
+        color: #059669;
+      }
+      .supported-section {
+        background: #f1f5f9;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.06);
+        padding: 1.2rem 1rem 1rem 1rem;
+        margin-bottom: 1.5rem;
+        width: 100%;
+        max-width: 600px;
+        text-align: left;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      .supported-section h2 {
+        font-size: 1.1rem;
+        color: #6366f1;
+        margin: 0 0 0.7rem 0;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+      }
+      .supported-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem 1.2rem;
+      }
+      .supported-list li {
+        background: #e0e7ff;
+        color: #1e293b;
+        border-radius: 8px;
+        padding: 0.4rem 0.9rem;
+        font-size: 0.98rem;
+        font-weight: 500;
+        margin-bottom: 0.2rem;
+        box-shadow: 0 1px 4px rgba(99, 102, 241, 0.04);
+      }
+      @media (max-width: 600px) {
+        .supported-section {
+          padding: 0.7rem 0.2rem 0.7rem 0.2rem;
+          max-width: 100vw;
+        }
+        .supported-list li {
+          font-size: 0.85rem;
+          padding: 0.3rem 0.6rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Disease Classification from Chest X-ray</h1>
+      <div class="supported-section">
+        <h2>Supported Classifications</h2>
+        <ul class="supported-list">
+          {% for label in class_labels %}
+          <li>{{ label }}</li>
+          {% endfor %}
+        </ul>
+      </div>
+      <form action="/" method="post" enctype="multipart/form-data">
+        <label for="file-upload" class="custom-file-upload">
+          <span id="file-chosen">Choose an X-ray image</span>
+        </label>
+        <input
+          id="file-upload"
+          type="file"
+          name="file"
+          required
+          onchange="updateFileName()"
+        />
+        <button class="submit-btn" type="submit">Upload and Classify</button>
+      </form>
+      {% if prediction %}
+      <div class="result-card">
+        <h2>Prediction: <span>{{ prediction }}</span></h2>
+        <h3>Confidence: <span>{{ confidence }}%</span></h3>
+        <div id="confidence-bars" class="confidence-bars"></div>
+        <div class="image-preview">
+          <img src="{{ image_path }}" alt="Uploaded Image" />
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    <script>
+      function updateFileName() {
+        const input = document.getElementById("file-upload");
+        const fileChosen = document.getElementById("file-chosen");
+        if (input.files && input.files.length > 0) {
+          fileChosen.textContent = input.files[0].name;
+        } else {
+          fileChosen.textContent = "Choose an X-ray image";
+        }
+      }
+    </script>
+    {% if prediction and class_probs and class_labels %}
+    <script type="application/json" id="class-labels-json">
+      {{ class_labels|tojson }}
+    </script>
+    <script type="application/json" id="class-probs-json">
+      {{ class_probs|tojson }}
+    </script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const barsDiv = document.getElementById("confidence-bars");
+        const classLabels = JSON.parse(
+          document.getElementById("class-labels-json").textContent
+        );
+        const classProbs = JSON.parse(
+          document.getElementById("class-probs-json").textContent
+        );
+        const predicted = "{{ prediction }}";
+        barsDiv.innerHTML = "";
+        for (let i = 0; i < classLabels.length; i++) {
+          const isPred = classLabels[i] === predicted;
+          const barRow = document.createElement("div");
+          barRow.className = "bar-row";
+
+          const label = document.createElement("div");
+          label.className = "bar-label";
+          label.textContent = classLabels[i];
+
+          const barBg = document.createElement("div");
+          barBg.className = "bar-bg";
+
+          const barFill = document.createElement("div");
+          barFill.className = "bar-fill" + (isPred ? " predicted" : "");
+          barFill.style.width = classProbs[i] + "%";
+
+          barBg.appendChild(barFill);
+
+          const value = document.createElement("div");
+          value.className = "bar-value" + (isPred ? " predicted" : "");
+          value.textContent = classProbs[i] + "%";
+
+          barRow.appendChild(label);
+          barRow.appendChild(barBg);
+          barRow.appendChild(value);
+
+          barsDiv.appendChild(barRow);
+        }
+      });
+    </script>
+    {% endif %}
+  </body>
+</html>
