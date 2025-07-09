@@ -274,7 +274,10 @@
         <h3>Confidence: <span>{{ confidence }}%</span></h3>
         <div id="confidence-bars" class="confidence-bars"></div>
         <div class="image-preview">
-          <img src="data:image/jpeg;base64,{{ image_data }}" alt="Uploaded Image" />
+          <img
+            src="data:image/jpeg;base64,{{ image_data }}"
+            alt="Uploaded Image"
+          />
         </div>
       </div>
       {% endif %}
@@ -289,6 +292,68 @@
           fileChosen.textContent = "Choose an X-ray image";
         }
       }
+
+      // Client-side image compression before upload
+      document.addEventListener("DOMContentLoaded", function () {
+        const form = document.querySelector("form");
+        const fileInput = document.getElementById("file-upload");
+        form.addEventListener("submit", function (e) {
+          const file = fileInput.files[0];
+          if (!file) return;
+          // Only compress if image
+          if (!file.type.startsWith("image/")) return;
+          e.preventDefault();
+          const reader = new FileReader();
+          reader.onload = function (event) {
+            const img = new Image();
+            img.onload = function () {
+              // Resize if too large (max 1024px on longest side)
+              const maxDim = 1024;
+              let width = img.width;
+              let height = img.height;
+              if (width > height && width > maxDim) {
+                height = Math.round((height * maxDim) / width);
+                width = maxDim;
+              } else if (height > width && height > maxDim) {
+                width = Math.round((width * maxDim) / height);
+                height = maxDim;
+              } else if (width > maxDim) {
+                width = height = maxDim;
+              }
+              const canvas = document.createElement("canvas");
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext("2d");
+              ctx.drawImage(img, 0, 0, width, height);
+              canvas.toBlob(
+                function (blob) {
+                  // Create a new FormData and submit
+                  const formData = new FormData(form);
+                  formData.set(
+                    "file",
+                    blob,
+                    file.name.replace(/\.[^.]+$/, ".jpg")
+                  );
+                  fetch(form.action, {
+                    method: form.method,
+                    body: formData,
+                  }).then((response) => {
+                    if (response.redirected) {
+                      window.location.href = response.url;
+                    } else {
+                      window.location.reload();
+                    }
+                  });
+                },
+                "image/jpeg",
+                0.7
+              ); // 0.7 quality
+            };
+            img.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      });
     </script>
     {% if prediction and class_probs and class_labels %}
     <script type="application/json" id="class-labels-json">
