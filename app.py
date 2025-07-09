@@ -7,10 +7,10 @@ import torch
 import torch.nn.functional as F
 from torchvision import transforms
 from model import get_model
+from io import BytesIO
+import base64
 
 app = Flask(__name__)
-UPLOAD_FOLDER = "static/uploads"
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 # Your 6 class labels
 CLASSES = [
@@ -47,15 +47,13 @@ def index():
     class_probs = None
 
     if request.method == "POST":
-        file = request.files["file"]
+        file = request.files.get("file")
         if file:
-            filename = secure_filename(file.filename)
-            image_path = os.path.join(app.config["UPLOAD_FOLDER"], filename)
-            file.save(image_path)
-
-            # Process and predict
-            image = Image.open(image_path).convert("RGB")
+            image_bytes = file.read()
+            image = Image.open(BytesIO(image_bytes)).convert("RGB")
             image = transform(image).unsqueeze(0).to(device)
+
+            image_data = base64.b64encode(image_bytes).decode("utf-8")
 
             with torch.no_grad():
                 output = model(image)
@@ -72,13 +70,12 @@ def index():
         "index.html",
         prediction=prediction,
         confidence=confidence,
-        image_path=image_path,
+        image_data=image_data,
         class_probs=class_probs,
         class_labels=CLASSES,
     )
 
 
 if __name__ == "__main__":
-    os.makedirs(UPLOAD_FOLDER, exist_ok=True)
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

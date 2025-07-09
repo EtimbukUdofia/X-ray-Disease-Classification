@@ -274,7 +274,7 @@
         <h3>Confidence: <span>{{ confidence }}%</span></h3>
         <div id="confidence-bars" class="confidence-bars"></div>
         <div class="image-preview">
-          <img src="{{ image_path }}" alt="Uploaded Image" />
+          <img src="data:image/jpeg;base64,{{ image_data }}" alt="Uploaded Image" />
         </div>
       </div>
       {% endif %}
