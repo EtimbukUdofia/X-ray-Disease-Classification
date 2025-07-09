@@ -43,7 +43,7 @@ transform = transforms.Compose(
 def index():
     prediction = None
     confidence = None
-    image_path = None
+    image_data = None
     class_probs = None
 
     if request.method == "POST":
