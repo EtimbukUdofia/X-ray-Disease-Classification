@@ -246,7 +246,7 @@
   </head>
   <body>
     <div class="container">
-      <h1>Disease Classification from Chest X-ray</h1>
+      <h1 style="text-align: center;">Respiratory Disease Classification from Chest X-ray</h1>
       <div class="supported-section">
         <h2>Supported Classifications</h2>
         <ul class="supported-list">
@@ -257,7 +257,7 @@
       </div>
       <form action="/" method="post" enctype="multipart/form-data">
         <label for="file-upload" class="custom-file-upload">
-          <span id="file-chosen">Choose an X-ray image</span>
+          <span id="file-chosen">Upload an X-ray image</span>
         </label>
         <input
           id="file-upload"
@@ -266,7 +266,7 @@
           required
           onchange="updateFileName()"
         />
-        <button class="submit-btn" type="submit">Upload and Classify</button>
+        <button class="submit-btn" type="submit">Get Diagnosis</button>
       </form>
       {% if prediction %}
       <div class="result-card">

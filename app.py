@@ -16,7 +16,7 @@ app = Flask(__name__)
 CLASSES = [
     "Bacterial Pneumonia",
     "COVID",
-    "Lung_Opacity",
+    # "Lung_Opacity",
     "Normal",
     "Tuberculosis",
     "Viral Pneumonia",
@@ -25,7 +25,7 @@ CLASSES = [
 # Load model
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model = get_model(num_classes=len(CLASSES))
-model.load_state_dict(torch.load("model/xray_model.pth", map_location=device))
+model.load_state_dict(torch.load("model/xray_model_new.pth", map_location=device))
 model.to(device)
 model.eval()
 
